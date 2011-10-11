@@ -131,7 +131,7 @@ var Server = {
 };
 /* router request return [type , path]*/
 function xRouter(rules,path){
-	if(!rules)
+	if(!rules || (!rules.model && !rules.path))
 		return ['p',path];
 	else if(rules.model[path]){
 		return ['m',rules.model[path]];
