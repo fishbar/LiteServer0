@@ -10,4 +10,4 @@ var cfg = CFG.initConfig(__dirname);
 var server = require('./module/server');
 server.init(cfg);
 var end_time = new Date();
-console.log('[INFO] server start in '+ (end_time.getTime() - start_time.getTime())/1000 + ' second!');
+LOG.info('server start in '+ (end_time.getTime() - start_time.getTime())/1000 + ' second!');

@@ -8,8 +8,9 @@ exports.data = {
 	serverroot:__dirname,
 	charset:'utf8',
 
-	errlog:'error.log',
-	errformat:'%%',
+	logcfg:{
+		access: true , // or file path
+	},
 	
 	page404:'',
 	hosts:{

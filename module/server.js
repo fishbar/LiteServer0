@@ -30,7 +30,9 @@ var Server = {
 		var hosts = cfg.hosts;
 		var serv = mod.createServer(this.handler(hosts));
 		
+		// extends response Object 
 		if(i == 'http'){
+			// res.response();
 			mod.ServerResponse.prototype.response = function(body,statu_code){
 				var res_header = {'x-power' : 'LiteServer(nodeJS0.54)'};
 				if(!statu_code) statu_code=200;
@@ -39,11 +41,12 @@ var Server = {
 				this.write(body,this.charset);
 				this.end();
 			};
+			// res.responseJson();
 			mod.ServerResponse.prototype.responseJson = function(body,statu_code){
 				
 			};
 		}
-		
+		LOG.info(i + ' server listen port : '+port);
 		serv.listen(port);
 		this.serv[i] = serv;
 	},
@@ -87,6 +90,9 @@ var Server = {
 					type = 'p';
 				}
 			}
+			//access log
+			LOG.access(path);
+			
 			controller = hostcfg.root + path;
 			if(type == 'p'){
 				req.url = controller;
@@ -102,7 +108,7 @@ var Server = {
 				controllerMod = require(controller);
 			}catch(e){
 				// TODO load model error ,to 404 page
-				console.log('[WARNING]can not load controller:'+controller);
+				LOG.warn('can not load controller:'+controller);
 				res.response('<h1>404 Not Found</h1>',404);
 				res.end();
 				return;
@@ -114,12 +120,12 @@ var Server = {
 				}else if(req.method === "POST"){
 					boundary = getBoundary(header['content-type']);
 					parsePOST(req,boundary,function(post){
-						controllerMod.run(req,res,get,post,cookie);
 						//prepare GET,POST,REQ,RES,COOKIE,LOG,SESSION
+						controllerMod.run(req,res,get,post,cookie);
 					});
 				}
 			}catch(e){
-				console.log('[ERROR]controller execute error:'+controller);
+				LOG.error('controller execute error:'+controller);
 				res.response('<h1>500 Server Error</h1>',500);
 				res.end();
 				return;
@@ -129,22 +135,27 @@ var Server = {
 };
 /* router request return [type , path]*/
 function xRouter(rules,path){
-	if(!rules || (!rules.model && !rules.path))
+	if(!rules || (!rules.model && !rules.path)){
+		LOG.rewrite('apply<path>:'+path);
 		return ['p',path];
-	else if(rules.model[path]){
+	}else if(rules.model[path]){
+		LOG.rewrite('apply<model>:'+path+'=>'+rules.model[path]);
 		return ['m',rules.model[path]];
 	}else if(rules.path[path]){
+		LOG.rewrite('apply<path>:'+path+'=>'+rules.path[path]);
 		return ['p',rules.path[path]];
 	}
-	var n,rule;
-	for(var j in rules){
+	var n,rule,i,j,j_o;
+	for(j in rules){
+		j_o = j;
 		j = j=='model' ? 'm' : 'p';
 		rule = rules[j];
-		for(var i in rule){
+		for(i in rule){
 			if(i.indexOf('~') === 0){ // 正则匹配 match
 				n = i.substring(1);
 				if(new RegExp(n).test(path)){
 					if(typeof rule[i] == 'string'){
+						LOG.rewrite('apply<'+j_o+'>:'+path+'=>'+rules.path[path]);
 						return [j,rule[i]];
 					}else{
 						//TODO impletement apache rewrite rule [P,L,NC] if need,now is empty
@@ -153,6 +164,7 @@ function xRouter(rules,path){
 			}
 		}
 	}
+	LOG.rewrite('apply<path>:none,using original path');
 	return ['p',path];
 }
 
