@@ -124,8 +124,6 @@ var Server = {
 				res.end();
 				return;
 			}
-			// GC manually
-			header = hostcfg = get = post = cookie = controllerMod = null;
 		}
 	}
 };

@@ -50,7 +50,7 @@ exports.loadHostRouter = function(tmp_host,hostdomain){
 			}
 		}
 	}catch(e){
-		console.log('[INFO]host:'+tmp_host.servername+' : no router rule!');
+		console.log('[INFO] host:'+tmp_host.servername+' : no router rule!');
 	}
 	return tmp_host;
 }
