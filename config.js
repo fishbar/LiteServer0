@@ -15,16 +15,19 @@ exports.data = {
 	hosts:{
 		'1.test.com':
 		{
-			root:'d:/wwwroot',	// end without '/'
+			root:__dirname+'/wwwroot',	// end without '/'
 			charset:'utf8',
 			servername:'1.test.com',
 			index:'index.html',
 			errlog:'error.log',
 			router:{
-				
-			},
-			rewrite:{
-				'/(\w+)$'	: ['m','control/$1.js']
+				model:{
+					//'/index'	:'/test.js'
+				},
+				// static path router , server will treat it as a path
+				path:{
+					
+				}
 			}
 		},
 		'2.test.com':
