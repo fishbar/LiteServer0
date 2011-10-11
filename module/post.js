@@ -95,7 +95,7 @@ fish
 		}
 		// release tmp vars
 		buf_name = buf_fname = buf_str = count = offset = offset_buf = len = line = null;
-		cb(post);
+		if(cb)cb(post);
 	});
 };
 
