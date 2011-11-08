@@ -8,6 +8,8 @@ var start_time = new Date();
 var cfg = CFG.initConfig(__dirname);
 //start server
 var server = require('./module/server');
-server.init(cfg);
-var end_time = new Date();
-LOG.info('server start in '+ (end_time.getTime() - start_time.getTime())/1000 + ' second!');
+server.init(cfg,function(){
+	var end_time = new Date();
+	LOG.info('server start in '+ (end_time.getTime() - start_time.getTime())/1000 + ' second!');
+});
+

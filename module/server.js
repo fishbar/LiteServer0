@@ -1,11 +1,11 @@
 /**
  *  define model public functions
  */
-exports.init = function(cfg){
+exports.init = function(cfg,cb){
 	debug = cfg.debug;
 	//init load models
 	for(var i in cfg.listen){
-		Server.init(i,cfg);
+		Server.init(i,cfg,cb);
 	}
 };
 /**
@@ -24,7 +24,7 @@ var Server = {
 	staticModel:{},
 	serv:{},
 	preload:function(){},
-	init:function(i,cfg){
+	init:function(i,cfg,cb){
 		var mod  = require(i);
 		var port = cfg.listen[i];
 		var hosts = cfg.hosts;
@@ -47,7 +47,15 @@ var Server = {
 			};
 		}
 		LOG.info(i + ' server listen port : '+port);
-		serv.listen(port);
+		serv.on('error',function(error){
+			var msg = {
+				'EADDRINUSE':'server port allready in use ,please point to another one!',
+			}
+			LOG.error(msg[error.code]);
+		});
+		serv.listen(port,function(args){
+			if(cb)cb();
+		});
 		this.serv[i] = serv;
 	},
 	handler:function(hosts){
