@@ -46,10 +46,46 @@ var MIME = {
 	'zip' 	: 'application/zip'
 	//Extends when you needed
 };
+/** gzip controller  **/
+var GZIP = {
+	'html' : true,
+	'txt' 	: true,
+	'js' 	: true,
+	'css' 	: true
+};
+/**
+ * cache expires by mime-type, unit : second
+ */
+var T_HOUR = 3600;
+var T_DAY = 3600 * 24;
+var T_WEEK = 3600 * 24 * 7;
+var T_MONTH = 3600 * 24 * 30;
+var T_YEAR = 3600 * 24 * 365;
+var GZIP = true;
+var mime_cache = {
+	'bmp' : T_YEAR,
+	'css' 	: T_YEAR,
+	'gif' 	: T_YEAR,
+	'htm' 	: T_YEAR,
+	'html' 	: T_YEAR,
+	'jpe' 	: T_YEAR,
+	'jpeg' 	: T_YEAR,
+	'jpg' 	: T_YEAR,
+	'js' 	: T_YEAR,
+	'swf' 	: T_YEAR,
+	'txt' 	: T_YEAR,
+};
+
 /**
  * @param {String} suffix suffix with LowerCase
  */
 exports.getType = function(suffix){
 	var mime = MIME[suffix];
 	return mime ? mime : MIME['*'];
+}
+exports.needGzip = function(suffix){
+	return GZIP[suffix];
+}
+exports.getExpire = function(suffix){
+	return mime_cache[suffix];
 }

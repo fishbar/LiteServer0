@@ -36,10 +36,21 @@ var Server = {
 			mod.ServerResponse.prototype.response = function(body,statu_code){
 				var res_header = {'x-power' : 'LiteServer(nodeJS0.54)'};
 				if(!statu_code) statu_code=200;
-				if(body)res_header['content-length'] = body.length;	
-				this.writeHead(statu_code,res_header);
-				this.write(body,this.charset);
-				this.end();
+				if(body.pipe){
+					this.writeHead(statu_code,res_header);
+					var _ = this;
+					body.on("end", function() {
+						//console.log('body pipe end');
+						body.removeAllListeners('end');
+					 	_.end();
+					});
+					body.pipe(this);
+				}else{
+					if(body)res_header['content-length'] = body.length;	
+					this.writeHead(statu_code,res_header);
+					this.write(body,this.charset);
+					this.end();
+				}
 			};
 			// res.responseJson();
 			mod.ServerResponse.prototype.responseJson = function(body,statu_code){
