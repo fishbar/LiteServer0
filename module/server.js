@@ -15,7 +15,9 @@ var debug = false;
 var LOG = require('./log');
 var FS = require('fs');
 var CFG = require('./config');
+var ZLIB = require('zlib');
 var EXCEPTION =require('./exception');
+var Stream = require('stream');
 var Cookie = require('./cookie').Cookie;
 var parseGET = require('./get').parseGET;
 var parsePOST = require('./post').parsePOST;
@@ -34,16 +36,29 @@ var Server = {
 		if(i == 'http'){
 			// res.response();
 			mod.ServerResponse.prototype.response = function(body,statu_code){
-				var res_header = {'x-power' : 'LiteServer(nodeJS0.54)'};
+				var res_header = {'x-power' : 'LiteServer(NodeJS)'};
 				if(!statu_code) statu_code=200;
+				// gzip
+				var gzip = this.getHeader('content-encoding');
+				switch (gzip) {
+				    // or, just use zlib.createUnzip() to handle both cases
+				    case 'gzip':
+				    	gzip = ZLIB.createGunzip()
+				    	gzip = body.pipe(gzip);
+				    	break;
+				    case 'deflate':
+				    	gzip = ZLIB.createInflate();
+				    	gzip = body.pipe(gzip);
+				    	break;
+				    default:
+				    	gzip = body;
+				      	break;
+				  }
+				  
+				// cache controll
 				if(body.pipe){
+					console.log(this._headers);
 					this.writeHead(statu_code,res_header);
-					var _ = this;
-					body.on("end", function() {
-						//console.log('body pipe end');
-						body.removeAllListeners('end');
-					 	_.end();
-					});
 					body.pipe(this);
 				}else{
 					if(body)res_header['content-length'] = body.length;	
@@ -132,8 +147,7 @@ var Server = {
 				res.end();
 				return;
 			}
-			
-			try{
+			//try{
 				if(req.method === 'GET'){
 					controllerMod.run(req,res,get,{},cookie);
 				}else if(req.method === "POST"){
@@ -143,12 +157,17 @@ var Server = {
 						controllerMod.run(req,res,get,post,cookie);
 					});
 				}
+				/*
 			}catch(e){
 				LOG.error('controller execute error:'+controller);
 				res.response('<h1>500 Server Error</h1>',500);
+				if(debug){
+					LOG.error(e);
+				}
 				res.end();
 				return;
 			}
+			*/
 		}
 	}
 };

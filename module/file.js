@@ -2,9 +2,19 @@ exports.run = function(req,res,get,post,cookie){
 	var body = '',statu_code;
 	var ff;
 	try{
-		ff = getFile(req.url);
+		var m = req.url.match(/\.(\w+)$/);
+		if(m)
+			m = m[1].toLowerCase();
+		else
+			m = '*';
+		ff = getFile(req.url,m);
 		if(ff[0]){
 			body = ff[0];
+			
+			gzip = MIME.needGzip(m);
+			if(gzip){
+				//res.setHeader('content-encoding','deflate');
+			}
 			res.setHeader('content-type',ff[1]);
 		}else{
 			if(req.url.match(/\.ico$/)){
@@ -22,9 +32,8 @@ exports.run = function(req,res,get,post,cookie){
 			}
 		}
 	}catch(e){
-		LOG.log('[Error:Controller] error to run controller:' + controller);
-		statu_code = 500;
-		body = '<h1>Server internal Error!!!</h1>';
+		console.log("static file error");
+		throw e;
 	}
 	res.response(body,statu_code);
 }
@@ -32,21 +41,14 @@ exports.run = function(req,res,get,post,cookie){
 var FS = require('fs');
 var ZLIB = require('zlib');
 var MIME = require('./mime');
+var LOG = require('./log');
 /**
  * 
  * return  [file-content,mime/type]
  */
-function getFile(path,charset){
-	
-	var m = path.match(/\.(\w+)$/);
-	var mime, fstream, gzip;
-	if(m)
-		m = m[1].toLowerCase();
-	else
-		m = '*';
+function getFile(path,m){
+	var mime, fstream;
 	mime = MIME.getType(m);
-	gzip = MIME.needGzip(m);
-	
 	try{
 		fstream = FS.createReadStream(path);
 	}catch(e){

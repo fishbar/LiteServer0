@@ -49,9 +49,10 @@ var MIME = {
 /** gzip controller  **/
 var GZIP = {
 	'html' : true,
+	'htm' : true,
 	'txt' 	: true,
 	'js' 	: true,
-	'css' 	: true
+	'css' 	: true,
 };
 /**
  * cache expires by mime-type, unit : second
@@ -61,7 +62,6 @@ var T_DAY = 3600 * 24;
 var T_WEEK = 3600 * 24 * 7;
 var T_MONTH = 3600 * 24 * 30;
 var T_YEAR = 3600 * 24 * 365;
-var GZIP = true;
 var mime_cache = {
 	'bmp' : T_YEAR,
 	'css' 	: T_YEAR,
