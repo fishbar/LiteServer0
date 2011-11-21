@@ -43,23 +43,24 @@ var Server = {
 				switch (gzip) {
 				    // or, just use zlib.createUnzip() to handle both cases
 				    case 'gzip':
-				    	gzip = ZLIB.createGunzip()
-				    	gzip = body.pipe(gzip);
+				    	gzip = ZLIB.createGzip();
 				    	break;
 				    case 'deflate':
-				    	gzip = ZLIB.createInflate();
-				    	gzip = body.pipe(gzip);
+				    	gzip = ZLIB.createDeflate();
 				    	break;
 				    default:
-				    	gzip = body;
+				    	gzip = null;
 				      	break;
 				  }
 				  
 				// cache controll
 				if(body.pipe){
-					console.log(this._headers);
+					res_header['transfer-encoding'] = 'chunked';
 					this.writeHead(statu_code,res_header);
-					body.pipe(this);
+					if(gzip)
+						body.pipe(gzip).pipe(this);
+                    else
+						body.pipe(this);
 				}else{
 					if(body)res_header['content-length'] = body.length;	
 					this.writeHead(statu_code,res_header);

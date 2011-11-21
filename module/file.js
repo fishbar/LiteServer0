@@ -1,5 +1,5 @@
 exports.run = function(req,res,get,post,cookie){
-	var body = '',statu_code;
+	var body = '',statu_code,gzip;
 	var ff;
 	try{
 		var m = req.url.match(/\.(\w+)$/);
@@ -10,11 +10,18 @@ exports.run = function(req,res,get,post,cookie){
 		ff = getFile(req.url,m);
 		if(ff[0]){
 			body = ff[0];
-			
+			//gzip action
 			gzip = MIME.needGzip(m);
 			if(gzip){
-				//res.setHeader('content-encoding','deflate');
+				acceptEncoding = req.headers['accept-encoding'];
+				if(acceptEncoding.match(/^gzip/)){
+					res.setHeader('content-encoding','gzip');
+				}else if(acceptEncoding.match(/^deflate/)){
+					res.setHeader('content-encoding','deflate');
+				}
 			}
+			// cache control action
+			
 			res.setHeader('content-type',ff[1]);
 		}else{
 			if(req.url.match(/\.ico$/)){
